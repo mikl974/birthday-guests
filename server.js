@@ -2,12 +2,24 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { MongoClient } = require('mongodb');
 
-const GUESTS_FILE = path.join(__dirname, 'guests.json');
 const CONFIG_FILE = path.join(__dirname, 'config.json');
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const PORT = process.env.PORT || 3000;
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000; // 8 hours
+
+// --- Database ---
+let guestsCol;
+
+async function connectDB() {
+  const uri = process.env.MONGODB_URI;
+  if (!uri) throw new Error('MONGODB_URI environment variable is not set');
+  const client = new MongoClient(uri);
+  await client.connect();
+  guestsCol = client.db('birthday').collection('guests');
+  console.log('✅ Connected to MongoDB');
+}
 
 // --- Auth helpers ---
 
@@ -65,21 +77,17 @@ const MIME_TYPES = {
   '.json': 'application/json',
 };
 
-function readGuests() {
-  try {
-    return JSON.parse(fs.readFileSync(GUESTS_FILE, 'utf-8'));
-  } catch {
-    return [];
-  }
-}
-
-function writeGuests(guests) {
-  fs.writeFileSync(GUESTS_FILE, JSON.stringify(guests, null, 2));
-}
-
 function sendJSON(res, status, data) {
   res.writeHead(status, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(data));
+}
+
+function getGuests() {
+  return guestsCol.find({}, { projection: { _id: 0 } }).toArray();
+}
+
+function getGuest(id) {
+  return guestsCol.findOne({ id }, { projection: { _id: 0 } });
 }
 
 function serveStatic(res, filePath) {
@@ -172,7 +180,7 @@ const server = http.createServer(async (req, res) => {
   // --- API routes (protected) ---
   if (pathname === '/api/guests' && req.method === 'GET') {
     if (!requireAuth(req, res)) return;
-    return sendJSON(res, 200, readGuests());
+    return sendJSON(res, 200, await getGuests());
   }
 
   if (pathname === '/api/guests' && req.method === 'POST') {
@@ -182,11 +190,9 @@ const server = http.createServer(async (req, res) => {
       const name = (body.name || '').trim();
       if (!name) return sendJSON(res, 400, { error: 'Name is required' });
       const companions = Math.max(1, parseInt(body.companions) || 1);
-      const guests = readGuests();
       const guest = { id: crypto.randomUUID(), name, companions, rsvp: 'pending' };
-      guests.push(guest);
-      writeGuests(guests);
-      return sendJSON(res, 201, guest);
+      await guestsCol.insertOne(guest);
+      return sendJSON(res, 201, { id: guest.id, name: guest.name, companions: guest.companions, rsvp: guest.rsvp });
     } catch {
       return sendJSON(res, 400, { error: 'Invalid request' });
     }
@@ -200,30 +206,25 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'PATCH') {
       try {
         const body = await parseBody(req);
-        const guests = readGuests();
-        const idx = guests.findIndex(g => g.id === id);
-        if (idx === -1) return sendJSON(res, 404, { error: 'Guest not found' });
-        if (body.rsvp && ['confirmed', 'declined', 'pending'].includes(body.rsvp)) {
-          guests[idx].rsvp = body.rsvp;
-        }
-        if (body.name && body.name.trim()) {
-          guests[idx].name = body.name.trim();
-        }
-        if (body.companions !== undefined) {
-          guests[idx].companions = Math.max(1, parseInt(body.companions) || 1);
-        }
-        writeGuests(guests);
-        return sendJSON(res, 200, guests[idx]);
+        const update = {};
+        if (body.rsvp && ['confirmed', 'declined', 'pending'].includes(body.rsvp)) update.rsvp = body.rsvp;
+        if (body.name && body.name.trim()) update.name = body.name.trim();
+        if (body.companions !== undefined) update.companions = Math.max(1, parseInt(body.companions) || 1);
+        const result = await guestsCol.findOneAndUpdate(
+          { id },
+          { $set: update },
+          { returnDocument: 'after', projection: { _id: 0 } }
+        );
+        if (!result) return sendJSON(res, 404, { error: 'Guest not found' });
+        return sendJSON(res, 200, result);
       } catch {
         return sendJSON(res, 400, { error: 'Invalid request' });
       }
     }
 
     if (req.method === 'DELETE') {
-      const guests = readGuests();
-      const filtered = guests.filter(g => g.id !== id);
-      if (filtered.length === guests.length) return sendJSON(res, 404, { error: 'Guest not found' });
-      writeGuests(filtered);
+      const result = await guestsCol.deleteOne({ id });
+      if (result.deletedCount === 0) return sendJSON(res, 404, { error: 'Guest not found' });
       return sendJSON(res, 200, { success: true });
     }
   }
@@ -240,6 +241,11 @@ const server = http.createServer(async (req, res) => {
   res.end('Not found');
 });
 
-server.listen(PORT, () => {
-  console.log(`🎂 Birthday Guest Manager running at http://localhost:${PORT}`);
+connectDB().then(() => {
+  server.listen(PORT, () => {
+    console.log(`🎂 Birthday Guest Manager running at http://localhost:${PORT}`);
+  });
+}).catch(err => {
+  console.error('Failed to connect to MongoDB:', err.message);
+  process.exit(1);
 });
