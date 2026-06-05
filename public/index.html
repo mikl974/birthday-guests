@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎂 Emma's 18th Birthday</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: white;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      text-shadow: 0 2px 8px rgba(0,0,0,.2);
+    }
+
+    header p {
+      font-size: 1rem;
+      opacity: .85;
+      margin-top: .4rem;
+    }
+
+    /* Stats */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: rgba(255,255,255,.2);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 1rem;
+      text-align: center;
+      color: white;
+      border: 1px solid rgba(255,255,255,.3);
+    }
+
+    .stat-card .number {
+      font-size: 2rem;
+      font-weight: 800;
+    }
+
+    .stat-card .label {
+      font-size: .75rem;
+      opacity: .85;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-top: .2rem;
+    }
+
+    /* Card */
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,.12);
+      margin-bottom: 1.5rem;
+    }
+
+    /* Add form */
+    .add-form {
+      display: flex;
+      gap: .75rem;
+    }
+
+    .add-form input {
+      flex: 1;
+      padding: .75rem 1rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: border-color .2s;
+      outline: none;
+    }
+
+    .add-form input:focus { border-color: #667eea; }
+
+    .btn {
+      padding: .75rem 1.25rem;
+      border: none;
+      border-radius: 12px;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .15s, transform .1s;
+    }
+
+    .btn:active { transform: scale(.97); }
+    .btn:hover { opacity: .88; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea, #f093fb);
+      color: white;
+      white-space: nowrap;
+    }
+
+    /* Filter bar */
+    .filter-bar {
+      display: flex;
+      gap: .5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .filter-btn {
+      padding: .4rem .9rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 20px;
+      background: white;
+      font-size: .85rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: #6b7280;
+      transition: all .2s;
+    }
+
+    .filter-btn.active {
+      border-color: #667eea;
+      background: #667eea;
+      color: white;
+    }
+
+    .filter-count {
+      display: inline-block;
+      background: rgba(0,0,0,.12);
+      border-radius: 20px;
+      padding: .05rem .4rem;
+      font-size: .75rem;
+      margin-left: .2rem;
+      font-weight: 700;
+    }
+
+    .filter-btn:not(.active) .filter-count {
+      background: #e5e7eb;
+      color: #6b7280;
+    }
+
+    /* Guest list */
+    .guest-list { display: flex; flex-direction: column; gap: .75rem; }
+
+    .guest-item {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .9rem 1rem;
+      border: 2px solid #f3f4f6;
+      border-radius: 14px;
+      transition: border-color .2s, box-shadow .2s;
+      animation: slideIn .25s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .guest-item:hover { border-color: #e5e7eb; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+
+    .guest-avatar {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .guest-name {
+      flex: 1;
+      font-weight: 600;
+      font-size: .95rem;
+      color: #111827;
+      cursor: pointer;
+      border-radius: 8px;
+      padding: .2rem .4rem;
+      transition: background .15s;
+    }
+
+    .guest-name:hover { background: #f3f4f6; }
+
+    .guest-name-input {
+      flex: 1;
+      font-weight: 600;
+      font-size: .95rem;
+      color: #111827;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      padding: .2rem .4rem;
+      outline: none;
+      min-width: 0;
+    }
+
+    /* RSVP select */
+    .rsvp-select {
+      padding: .4rem .75rem;
+      border-radius: 20px;
+      border: 2px solid;
+      font-size: .8rem;
+      font-weight: 700;
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      padding-right: 1.75rem;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right .5rem center;
+      transition: border-color .2s;
+    }
+
+    .rsvp-select.confirmed { border-color: #10b981; color: #10b981; background-color: #ecfdf5; }
+    .rsvp-select.declined  { border-color: #ef4444; color: #ef4444; background-color: #fef2f2; }
+    .rsvp-select.pending   { border-color: #f59e0b; color: #f59e0b; background-color: #fffbeb; }
+
+    .btn-delete {
+      background: none;
+      border: 2px solid #fee2e2;
+      color: #ef4444;
+      border-radius: 10px;
+      padding: .4rem .6rem;
+      font-size: .85rem;
+      line-height: 1;
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    /* Companions input */
+    .companions-wrap {
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+      background: #f3f4f6;
+      border-radius: 10px;
+      padding: .3rem .5rem;
+      font-size: .8rem;
+      color: #6b7280;
+      flex-shrink: 0;
+    }
+
+    .companions-wrap span { font-size: .9rem; }
+
+    .companions-input {
+      width: 2.4rem;
+      border: none;
+      background: transparent;
+      font-size: .85rem;
+      font-weight: 700;
+      color: #374151;
+      text-align: center;
+      outline: none;
+      -moz-appearance: textfield;
+    }
+
+    .companions-input::-webkit-inner-spin-button,
+    .companions-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+    .companions-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #9ca3af;
+      font-size: .75rem;
+      padding: 0 .1rem;
+      line-height: 1;
+    }
+
+    .companions-btn:hover { color: #374151; }
+
+    /* Extra guests field in add form */
+    .add-form .companions-field {
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: .5rem .75rem;
+      background: white;
+      flex-shrink: 0;
+      transition: border-color .2s;
+    }
+
+    .add-form .companions-field:focus-within { border-color: #667eea; }
+
+    .add-form .companions-field label {
+      font-size: .8rem;
+      color: #6b7280;
+      white-space: nowrap;
+    }
+
+    .add-form .companions-field input {
+      width: 2.5rem;
+      border: none;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #111827;
+      text-align: center;
+      outline: none;
+      padding: 0;
+      -moz-appearance: textfield;
+    }
+
+    .add-form .companions-field input::-webkit-inner-spin-button,
+    .add-form .companions-field input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+    }
+
+    .empty-state svg { margin-bottom: 1.25rem; }
+    .empty-state h4 { font-size: 1.05rem; font-weight: 700; color: #374151; margin-bottom: .4rem; }
+    .empty-state p  { font-size: .875rem; color: #9ca3af; line-height: 1.5; }
+
+    /* Compact view */
+    .view-toggle {
+      display: flex;
+      gap: .4rem;
+      margin-left: auto;
+    }
+
+    .view-btn {
+      background: none;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      padding: .3rem .5rem;
+      cursor: pointer;
+      font-size: .9rem;
+      color: #9ca3af;
+      line-height: 1;
+      transition: all .15s;
+    }
+
+    .view-btn.active {
+      border-color: #667eea;
+      color: #667eea;
+      background: #eff0fe;
+    }
+
+    .compact-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+    }
+
+    .compact-chip {
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+      background: #f3f4f6;
+      border-radius: 20px;
+      padding: .35rem .75rem .35rem .35rem;
+      font-size: .85rem;
+      font-weight: 600;
+      color: #111827;
+      animation: slideIn .2s ease;
+    }
+
+    .compact-chip .chip-avatar {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .7rem;
+      font-weight: 800;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .compact-chip .chip-seats {
+      font-size: .75rem;
+      color: #6b7280;
+      font-weight: 500;
+    }
+
+    .compact-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+      gap: .5rem;
+    }
+
+    .compact-header h3 {
+      font-size: .9rem;
+      font-weight: 700;
+      color: #374151;
+    }
+
+    .compact-header .badge {
+      background: #ecfdf5;
+      color: #10b981;
+      border-radius: 20px;
+      padding: .15rem .5rem;
+      font-size: .75rem;
+      font-weight: 700;
+    }
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      max-width: 360px;
+      width: calc(100% - 2rem);
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      animation: popIn .2s ease;
+      text-align: center;
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(.9); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .modal .modal-icon { font-size: 2.5rem; margin-bottom: .75rem; }
+
+    .modal h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: .4rem;
+    }
+
+    .modal p {
+      color: #6b7280;
+      font-size: .9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal p strong { color: #111827; }
+
+    .modal-actions {
+      display: flex;
+      gap: .75rem;
+      justify-content: center;
+    }
+
+    .btn-cancel {
+      background: #f3f4f6;
+      color: #374151;
+      padding: .65rem 1.25rem;
+      border-radius: 12px;
+      border: none;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+    }
+
+    .btn-cancel:hover { background: #e5e7eb; }
+
+    .btn-confirm-delete {
+      background: #ef4444;
+      color: white;
+      padding: .65rem 1.25rem;
+      border-radius: 12px;
+      border: none;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+    }
+
+    .btn-confirm-delete:hover { background: #dc2626; }
+
+    @media (max-width: 480px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      header h1 { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🎂 Emma's 18th Birthday</h1>
+    <p>Manage your party invitations</p>
+    <a href="/logout" style="
+      display:inline-block; margin-top:.75rem;
+      padding:.35rem .9rem; border-radius:20px;
+      background:rgba(255,255,255,.2); color:white;
+      text-decoration:none; font-size:.8rem; font-weight:600;
+      border:1px solid rgba(255,255,255,.4);
+      transition:background .2s;
+    " onmouseover="this.style.background='rgba(255,255,255,.35)'"
+       onmouseout="this.style.background='rgba(255,255,255,.2)'">🚪 Log out</a>
+  </header>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card"><div class="number" id="stat-confirmed">0</div><div class="label">✅ Confirmed</div></div>
+    <div class="stat-card"><div class="number" id="stat-seats">0</div><div class="label">🪑 Total seats</div></div>
+  </div>
+
+  <!-- Add guest -->
+  <div class="card">
+    <form class="add-form" id="add-form">
+      <input type="text" id="name-input" placeholder="Guest name…" autocomplete="off" required />
+      <div class="companions-field">
+        <label for="companions-input">👥</label>
+        <input type="number" id="companions-input" min="1" max="20" value="1" title="Total people including the guest" />
+        <label for="companions-input" style="font-size:.75rem;color:#9ca3af">total</label>
+      </div>
+      <button type="submit" class="btn btn-primary">+ Add</button>
+    </form>
+  </div>
+
+  <!-- Guest list -->
+  <div class="card">
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">All <span class="filter-count" id="count-all">0</span></button>
+      <button class="filter-btn" data-filter="confirmed">✅ Confirmed <span class="filter-count" id="count-confirmed">0</span></button>
+      <button class="filter-btn" data-filter="pending">⏳ Pending <span class="filter-count" id="count-pending">0</span></button>
+      <button class="filter-btn" data-filter="declined">❌ Declined <span class="filter-count" id="count-declined">0</span></button>
+      <div class="view-toggle">
+        <button class="view-btn active" id="view-detail" title="Detailed view">☰</button>
+        <button class="view-btn" id="view-compact" title="Compact view">⊞</button>
+        <button class="view-btn" id="export-csv" title="Export to CSV">⬇ CSV</button>
+      </div>
+    </div>
+    <div class="guest-list" id="guest-list"></div>
+  </div>
+</div>
+
+<!-- Delete confirmation modal -->
+<div class="modal-backdrop" id="delete-modal">
+  <div class="modal">
+    <div class="modal-icon">🗑️</div>
+    <h3>Remove guest?</h3>
+    <p>Are you sure you want to remove <strong id="modal-guest-name"></strong> from the list?</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="modal-cancel">Cancel</button>
+      <button class="btn-confirm-delete" id="modal-confirm">Remove</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = '/api/guests';
+  let guests = [];
+  let currentFilter = 'all';
+  let compactView = false;
+
+  const AVATAR_COLORS = ['#667eea','#f093fb','#f59e0b','#10b981','#3b82f6','#ec4899','#8b5cf6','#14b8a6'];
+
+  function avatarColor(name) {
+    let hash = 0;
+    for (const c of name) hash = (hash * 31 + c.charCodeAt(0)) & 0xffffffff;
+    return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+  }
+
+  function initials(name) {
+    return name.split(' ').slice(0, 2).map(w => w[0].toUpperCase()).join('');
+  }
+
+  async function loadGuests() {
+    const res = await fetch(API);
+    guests = await res.json();
+    render();
+  }
+
+  function updateStats() {
+    const confirmed = guests.filter(g => g.rsvp === 'confirmed');
+    const pending   = guests.filter(g => g.rsvp === 'pending');
+    const declined  = guests.filter(g => g.rsvp === 'declined');
+    document.getElementById('stat-confirmed').textContent = confirmed.length;
+    document.getElementById('stat-seats').textContent = confirmed.reduce((sum, g) => sum + (g.companions || 1), 0);
+    document.getElementById('count-all').textContent      = guests.length;
+    document.getElementById('count-confirmed').textContent = confirmed.length;
+    document.getElementById('count-pending').textContent   = pending.length;
+    document.getElementById('count-declined').textContent  = declined.length;
+  }
+
+  function render() {
+    updateStats();
+    const list = document.getElementById('guest-list');
+    const filtered = (currentFilter === 'all' ? guests : guests.filter(g => g.rsvp === currentFilter))
+      .slice().sort((a, b) => a.name.localeCompare(b.name));
+
+    if (compactView) {
+      if (filtered.length === 0) {
+        list.innerHTML = emptyStateHTML(currentFilter);
+        return;
+      }
+      const totalSeats = filtered.reduce((sum, g) => sum + (g.companions || 1), 0);
+      const label = currentFilter === 'all' ? 'All guests' : currentFilter.charAt(0).toUpperCase() + currentFilter.slice(1);
+      const icon = { all: '👥', confirmed: '✅', pending: '⏳', declined: '❌' }[currentFilter];
+      list.innerHTML = `
+        <div class="compact-header">
+          <h3>${icon} ${label}</h3>
+          <span class="badge">${filtered.length} guests · ${totalSeats} seats</span>
+        </div>
+        <div class="compact-list">
+          ${filtered.map(g => `
+            <div class="compact-chip">
+              <div class="chip-avatar" style="background:${avatarColor(g.name)}">${initials(g.name)}</div>
+              ${escHtml(g.name)}
+              ${(g.companions || 1) > 1 ? `<span class="chip-seats">+${(g.companions || 1) - 1}</span>` : ''}
+            </div>
+          `).join('')}
+        </div>`;
+      return;
+    }
+
+    if (filtered.length === 0) {
+      list.innerHTML = emptyStateHTML(currentFilter);
+      return;
+    }
+
+    list.innerHTML = filtered.map(g => `
+      <div class="guest-item" data-id="${g.id}">
+        <div class="guest-avatar" style="background:${avatarColor(g.name)}">${initials(g.name)}</div>
+        <span class="guest-name" onclick="startEditName('${g.id}')" title="Click to edit name">${escHtml(g.name)}</span>
+        <div class="companions-wrap" title="Total people including ${escHtml(g.name)}">
+          <span>👥</span>
+          <button class="companions-btn" onclick="changeCompanions('${g.id}', -1)">▼</button>
+          <input class="companions-input" type="number" min="1" max="20" value="${g.companions || 1}"
+            onchange="updateCompanions('${g.id}', this.value)"
+            onblur="updateCompanions('${g.id}', this.value)" />
+          <button class="companions-btn" onclick="changeCompanions('${g.id}', 1)">▲</button>
+        </div>
+        <select class="rsvp-select ${g.rsvp}" onchange="updateRSVP('${g.id}', this.value)">
+          <option value="pending"   ${g.rsvp==='pending'   ? 'selected':''}>⏳ Pending</option>
+          <option value="confirmed" ${g.rsvp==='confirmed' ? 'selected':''}>✅ Confirmed</option>
+          <option value="declined"  ${g.rsvp==='declined'  ? 'selected':''}>❌ Declined</option>
+        </select>
+        <button class="btn-delete" onclick="confirmDelete('${g.id}')" title="Remove">✕</button>
+      </div>
+    `).join('');
+  }
+
+  const EMPTY_STATES = {
+    all: {
+      title: 'No guests yet!',
+      msg: 'Start building your guest list by adding the first name above.',
+    },
+    confirmed: {
+      title: 'No confirmed guests yet',
+      msg: 'Guests who accepted the invitation will appear here.',
+    },
+    pending: {
+      title: 'No pending guests',
+      msg: 'Everyone has already replied — nice!',
+    },
+    declined: {
+      title: 'Nobody declined',
+      msg: "Everyone is coming! 🥳",
+    },
+  };
+
+  function emptyStateHTML(filter) {
+    const { title, msg } = EMPTY_STATES[filter] || EMPTY_STATES.all;
+    return `
+      <div class="empty-state">
+        <svg width="120" height="100" viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Table -->
+          <rect x="10" y="62" width="100" height="8" rx="4" fill="#e5e7eb"/>
+          <rect x="20" y="70" width="6" height="20" rx="3" fill="#e5e7eb"/>
+          <rect x="94" y="70" width="6" height="20" rx="3" fill="#e5e7eb"/>
+          <!-- Plates -->
+          <circle cx="38" cy="62" r="10" fill="#f3f4f6"/>
+          <circle cx="38" cy="62" r="7" fill="#e5e7eb"/>
+          <circle cx="82" cy="62" r="10" fill="#f3f4f6"/>
+          <circle cx="82" cy="62" r="7" fill="#e5e7eb"/>
+          <!-- Balloons -->
+          <ellipse cx="40" cy="28" rx="10" ry="13" fill="#c7d2fe"/>
+          <line x1="40" y1="41" x2="38" y2="60" stroke="#c7d2fe" stroke-width="1.5" stroke-dasharray="2 2"/>
+          <ellipse cx="60" cy="22" rx="11" ry="14" fill="#fbcfe8"/>
+          <line x1="60" y1="36" x2="60" y2="60" stroke="#fbcfe8" stroke-width="1.5" stroke-dasharray="2 2"/>
+          <ellipse cx="80" cy="28" rx="10" ry="13" fill="#fde68a"/>
+          <line x1="80" y1="41" x2="82" y2="60" stroke="#fde68a" stroke-width="1.5" stroke-dasharray="2 2"/>
+          <!-- Cake -->
+          <rect x="50" y="44" width="20" height="14" rx="3" fill="#fbcfe8"/>
+          <rect x="53" y="38" width="14" height="8" rx="2" fill="#fde68a"/>
+          <!-- Candles -->
+          <rect x="57" y="33" width="3" height="6" rx="1" fill="#f9a8d4"/>
+          <rect x="63" y="33" width="3" height="6" rx="1" fill="#93c5fd"/>
+          <!-- Flames -->
+          <ellipse cx="58.5" cy="32" rx="1.5" ry="2" fill="#fb923c"/>
+          <ellipse cx="64.5" cy="32" rx="1.5" ry="2" fill="#fb923c"/>
+        </svg>
+        <h4>${title}</h4>
+        <p>${msg}</p>
+      </div>`;
+  }
+
+  function escHtml(str) {
+    return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  async function addGuest(name, companions) {
+    const res = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, companions }),
+    });
+    if (res.ok) {
+      const guest = await res.json();
+      guests.push(guest);
+      render();
+    }
+  }
+
+  async function updateRSVP(id, rsvp) {
+    const res = await fetch(`${API}/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rsvp }),
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      guests = guests.map(g => g.id === id ? updated : g);
+      render();
+    }
+  }
+
+  async function updateCompanions(id, value) {
+    const companions = Math.max(1, Math.min(20, parseInt(value) || 1));
+    const res = await fetch(`${API}/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ companions }),
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      guests = guests.map(g => g.id === id ? updated : g);
+      updateStats();
+    }
+  }
+
+  function changeCompanions(id, delta) {
+    const guest = guests.find(g => g.id === id);
+    if (!guest) return;
+    const next = Math.max(1, Math.min(20, (guest.companions || 1) + delta));
+    // Update input visually immediately
+    const item = document.querySelector(`.guest-item[data-id="${id}"] .companions-input`);
+    if (item) item.value = next;
+    updateCompanions(id, next);
+  }
+
+  function startEditName(id) {
+    const guest = guests.find(g => g.id === id);
+    if (!guest) return;
+    const span = document.querySelector(`.guest-item[data-id="${id}"] .guest-name`);
+    if (!span) return;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'guest-name-input';
+    input.value = guest.name;
+    span.replaceWith(input);
+    input.focus();
+    input.select();
+
+    async function commit() {
+      const newName = input.value.trim();
+      if (newName && newName !== guest.name) {
+        await updateName(id, newName);
+      } else {
+        render(); // revert
+      }
+    }
+
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+      if (e.key === 'Escape') { render(); }
+    });
+    input.addEventListener('blur', commit);
+  }
+
+  async function updateName(id, name) {
+    const res = await fetch(`${API}/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      guests = guests.map(g => g.id === id ? updated : g);
+      render();
+    }
+  }
+
+  async function deleteGuest(id) {
+    const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      guests = guests.filter(g => g.id !== id);
+      render();
+    }
+  }
+
+  // --- Delete confirmation modal ---
+  let pendingDeleteId = null;
+  const modal = document.getElementById('delete-modal');
+  const modalGuestName = document.getElementById('modal-guest-name');
+
+  function confirmDelete(id) {
+    const guest = guests.find(g => g.id === id);
+    if (!guest) return;
+    pendingDeleteId = id;
+    modalGuestName.textContent = guest.name;
+    modal.classList.add('open');
+  }
+
+  document.getElementById('modal-cancel').addEventListener('click', () => {
+    modal.classList.remove('open');
+    pendingDeleteId = null;
+  });
+
+  document.getElementById('modal-confirm').addEventListener('click', async () => {
+    if (!pendingDeleteId) return;
+    modal.classList.remove('open');
+    await deleteGuest(pendingDeleteId);
+    pendingDeleteId = null;
+  });
+
+  modal.addEventListener('click', e => {
+    if (e.target === modal) {
+      modal.classList.remove('open');
+      pendingDeleteId = null;
+    }
+  });
+
+  document.getElementById('add-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const input = document.getElementById('name-input');
+    const companions = parseInt(document.getElementById('companions-input').value) || 0;
+    const name = input.value.trim();
+    if (name) {
+      addGuest(name, companions);
+      input.value = '';
+      document.getElementById('companions-input').value = 1;
+    }
+  });
+
+  document.getElementById('view-detail').addEventListener('click', () => {
+    compactView = false;
+    document.getElementById('view-detail').classList.add('active');
+    document.getElementById('view-compact').classList.remove('active');
+    render();
+  });
+
+  document.getElementById('view-compact').addEventListener('click', () => {
+    compactView = true;
+    document.getElementById('view-compact').classList.add('active');
+    document.getElementById('view-detail').classList.remove('active');
+    render();
+  });
+
+  document.getElementById('export-csv').addEventListener('click', () => {
+    const filtered = (currentFilter === 'all' ? guests : guests.filter(g => g.rsvp === currentFilter))
+      .slice().sort((a, b) => a.name.localeCompare(b.name));
+
+    const rows = [
+      ['Name', 'RSVP', 'Total people', 'Plus-ones'],
+      ...filtered.map(g => [
+        `"${g.name.replace(/"/g, '""')}"`,
+        g.rsvp,
+        g.companions || 1,
+        (g.companions || 1) - 1,
+      ])
+    ];
+
+    const csv = rows.map(r => r.join(',')).join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const label = currentFilter === 'all' ? 'all' : currentFilter;
+    a.href = url;
+    a.download = `guests-${label}-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      render();
+    });
+  });
+
+  loadGuests();
+</script>
+</body>
+</html>

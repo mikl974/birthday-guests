@@ -1,0 +1,9 @@
+{
+  "name": "birthday-guests",
+  "version": "1.0.0",
+  "description": "Birthday party guest list manager",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
