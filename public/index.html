@@ -505,6 +505,25 @@
     @media (max-width: 480px) {
       .stats { grid-template-columns: repeat(2, 1fr); }
       header h1 { font-size: 1.8rem; }
+
+      /* Guest row: name on first line, controls on second */
+      .guest-item {
+        flex-wrap: wrap;
+        gap: .5rem;
+      }
+      .guest-name, .guest-name-input {
+        min-width: calc(100% - 42px - 1.25rem);
+      }
+      .companions-wrap {
+        margin-left: calc(42px + .5rem);
+      }
+      .rsvp-select {
+        flex: 1;
+        min-width: 0;
+        font-size: .75rem;
+        padding: .35rem .5rem;
+        padding-right: 1.5rem;
+      }
     }
   </style>
 </head>
