@@ -81,6 +81,15 @@
     .add-form {
       display: flex;
       gap: .75rem;
+      flex-wrap: wrap;
+    }
+    @media (max-width: 480px) {
+      .add-form {
+        flex-direction: column;
+      }
+      .add-form .btn {
+        width: 100%;
+      }
     }
 
     .add-form input {
